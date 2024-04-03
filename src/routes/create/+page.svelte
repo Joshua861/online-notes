@@ -5,6 +5,8 @@
 	import { initializeApp } from 'firebase/app';
 	import { v4 as uuidv4 } from 'uuid';
 	import Navbar from '$lib/Navbar.svelte';
+	import { goto } from '$app/navigation';
+	import Warning from '$lib/Warning.svelte';
 
 	const firebaseConfig = {
 		apiKey: 'AIzaSyAS0OpX3__te9ONUbJH1hy5ovMIYeF84xo',
@@ -36,12 +38,17 @@
 				});
 
 				setDoc(doc(db, 'users', $user.uid), userData);
+
+				goto('/');
 			}
 		}
 	}
 </script>
 
 <FirebaseApp {auth} firestore={db}>
+	<SignedIn>
+		<Warning />
+	</SignedIn>
 	<div class="container">
 		<SignedIn let:user>
 			<Navbar />
