@@ -65,6 +65,8 @@
 	}
 </script>
 
+<svelte:head><title>Notes</title></svelte:head>
+
 <FirebaseApp {auth} firestore={db}>
 	<SignedOut>
 		<div class="flex h-screen w-screen justify-center align-middle">

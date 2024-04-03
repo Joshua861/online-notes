@@ -55,6 +55,8 @@
 	}
 </script>
 
+<svelte:head><title>View note</title></svelte:head>
+
 <FirebaseApp {auth} firestore={db}>
 	<div class="container">
 		<Navbar />

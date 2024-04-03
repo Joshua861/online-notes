@@ -85,6 +85,8 @@
 	}
 </script>
 
+<svelte:head><title>Edit note</title></svelte:head>
+
 <FirebaseApp {auth} firestore={db}>
 	<SignedIn>
 		<Warning />
