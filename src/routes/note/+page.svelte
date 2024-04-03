@@ -1,0 +1,76 @@
+<script lang="ts">
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
+	import { Doc, SignedIn, userStore, FirebaseApp } from 'sveltefire';
+	import { getAuth } from 'firebase/auth';
+	import { getFirestore, setDoc, doc, getDoc } from 'firebase/firestore';
+	import { initializeApp } from 'firebase/app';
+	import SvelteMarkdown from 'svelte-markdown';
+	import Navbar from '$lib/Navbar.svelte';
+	import Time from 'svelte-time/src/Time.svelte';
+	import { get } from 'svelte/store';
+
+	const firebaseConfig = {
+		apiKey: 'AIzaSyAS0OpX3__te9ONUbJH1hy5ovMIYeF84xo',
+		authDomain: 'online-notes-1c459.firebaseapp.com',
+		projectId: 'online-notes-1c459',
+		storageBucket: 'online-notes-1c459.appspot.com',
+		messagingSenderId: '261226857736',
+		appId: '1:261226857736:web:a4fb8bc8fd249cf95098bd'
+	};
+
+	let app = initializeApp(firebaseConfig);
+	let auth = getAuth(app);
+	let db = getFirestore(app);
+
+	let id: String;
+
+	onMount(async () => {
+		if ($page.url.searchParams.get('id')) {
+			id = $page.url.searchParams.get('id');
+		} else {
+			goto('/');
+		}
+	});
+
+	async function deleteNote() {
+		const user = userStore(auth);
+		const uid = get(user).uid;
+
+		const userData = await getDoc(doc(db, 'users', uid));
+		let notes = userData.data().notes;
+
+		notes = notes.filter((entry) => entry.id !== id);
+		let newUserData = userData.data();
+		newUserData.notes = notes;
+
+		setDoc(doc(db, 'users', uid), newUserData);
+
+		goto('/');
+	}
+</script>
+
+<FirebaseApp {auth} firestore={db}>
+	<div class="container">
+		<Navbar />
+		<SignedIn let:user>
+			{#if id}
+				<Doc ref="/users/{user.uid}" let:data>
+					{#each data?.notes as note}
+						{#if note.id === id}
+							<h1>{note.title}</h1>
+							<Time class=" font-mono text-slate-500" timestamp={note.time} />
+							<button
+								on:click={deleteNote}
+								class="!border-none font-mono outline active:border-none">delete</button
+							>
+							<br /><br />
+							<SvelteMarkdown source={note.content} />
+						{/if}
+					{/each}
+				</Doc>
+			{/if}
+		</SignedIn>
+	</div>
+</FirebaseApp>
