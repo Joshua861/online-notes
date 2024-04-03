@@ -25,9 +25,17 @@
 	const auth = getAuth(app);
 	const db = getFirestore(app);
 
-	let email: string, password: string;
+	let email: string, password: string, username: string;
 
 	function signUp() {
+		if (username.length < 3) {
+			toast.error('Username too short.');
+			return;
+		} else if (username.length > 20) {
+			toast.error('Username too long');
+			return;
+		}
+
 		createUserWithEmailAndPassword(auth, email, password)
 			.then(async (userCredential) => {
 				let user = userCredential.user;
@@ -39,7 +47,8 @@
 							title: 'Hello world',
 							id: uuidv4()
 						}
-					]
+					],
+					username: username
 				});
 
 				console.log(user);
@@ -71,6 +80,10 @@
 	<SignedOut>
 		<div class="flex h-screen w-screen justify-center align-middle">
 			<form class="m-3 mx-auto my-auto max-w-[800px]" on:submit|preventDefault>
+				<label>
+					Username (non unique, leave blank if signing in)
+					<input type="text" name="username" id="username" bind:value={username} />
+				</label>
 				<label>
 					Email
 					<input type="email" name="email" id="email" bind:value={email} />

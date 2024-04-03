@@ -10,5 +10,8 @@
 		<li>
 			<a href="/create">Create note</a>
 		</li>
+		<li>
+			<a href="/browse">Browse notes</a>
+		</li>
 	</ul>
 </nav>

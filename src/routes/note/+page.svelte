@@ -4,12 +4,13 @@
 	import { onMount } from 'svelte';
 	import { Doc, SignedIn, userStore, FirebaseApp } from 'sveltefire';
 	import { getAuth } from 'firebase/auth';
-	import { getFirestore, setDoc, doc, getDoc } from 'firebase/firestore';
+	import { getFirestore, setDoc, doc, getDoc, addDoc, collection } from 'firebase/firestore';
 	import { initializeApp } from 'firebase/app';
 	import SvelteMarkdown from 'svelte-markdown';
 	import Navbar from '$lib/Navbar.svelte';
 	import Time from 'svelte-time/src/Time.svelte';
 	import { get } from 'svelte/store';
+	import { v4 } from 'uuid';
 
 	const firebaseConfig = {
 		apiKey: 'AIzaSyAS0OpX3__te9ONUbJH1hy5ovMIYeF84xo',
@@ -25,6 +26,7 @@
 	let db = getFirestore(app);
 
 	let id: String;
+	let showPublishModal = false;
 
 	onMount(async () => {
 		if ($page.url.searchParams.get('id')) {
@@ -53,6 +55,24 @@
 	function editNote() {
 		goto(`/edit?id=${id}`);
 	}
+
+	async function publish() {
+		const user = get(userStore(auth));
+		let userData = (await getDoc(doc(db, 'users', user.uid))).data();
+		let note = userData.notes.find((note) => note.id == id);
+		let username = userData.username;
+
+		const docRef = await addDoc(collection(db, 'public'), {
+			title: note.title,
+			content: note.content,
+			date: note.date,
+			user: username,
+			likes: 0,
+			likedBy: []
+		});
+
+		goto(`/view?id=${docRef.id}`);
+	}
 </script>
 
 <svelte:head><title>View note</title></svelte:head>
@@ -74,6 +94,10 @@
 							<button on:click={editNote} class="!border-none font-mono outline active:border-none"
 								>edit</button
 							>
+							<button
+								on:click={() => (showPublishModal = true)}
+								class="!border-none font-mono outline active:border-none">publish</button
+							>
 							<br /><br />
 							<SvelteMarkdown source={note.content} />
 						{/if}
@@ -83,3 +107,22 @@
 		</SignedIn>
 	</div>
 </FirebaseApp>
+
+{#if showPublishModal}
+	<dialog open>
+		<article>
+			<header>
+				<button aria-label="Close" on:click={() => (showPublishModal = false)} rel="prev"></button>
+				<h3>Are you sure you want to publish?</h3>
+			</header>
+			<p>
+				If you publish your note, it will be visible for all to see, and there is no way to delete
+				it.
+			</p>
+			<footer>
+				<button class="secondary" on:click={() => (showPublishModal = false)}> Cancel </button>
+				<button on:click={publish}>Publish</button>
+			</footer>
+		</article>
+	</dialog>
+{/if}
