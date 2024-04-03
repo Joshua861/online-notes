@@ -65,7 +65,7 @@
 		const docRef = await addDoc(collection(db, 'public'), {
 			title: note.title,
 			content: note.content,
-			date: note.date,
+			time: note.time,
 			user: username,
 			likes: 0,
 			likedBy: []

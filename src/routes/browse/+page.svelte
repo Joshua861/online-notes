@@ -32,7 +32,7 @@
 
 		if (order == 'popular')
 			docs = await getDocs(query(publicRef, orderBy('likes', 'desc'), limit(10)));
-		if (order == 'new') docs = await getDocs(query(publicRef, orderBy('date', 'desc'), limit(10)));
+		if (order == 'new') docs = await getDocs(query(publicRef, orderBy('time', 'desc'), limit(10)));
 
 		let newNotes = notes;
 		docs.forEach((doc) => {
@@ -74,7 +74,7 @@
 		<li class="list-none">
 			<a href="/view?id={note.id}">{note.title}</a>
 			<div class="font-mono text-slate-500">
-				<Time relative timestamp={note.date} /> | {note.user} | likes: {note.likes}
+				<Time relative timestamp={note.time} /> | {note.user} | likes: {note.likes}
 			</div>
 			<br />
 		</li>
