@@ -49,6 +49,10 @@
 
 		goto('/');
 	}
+
+	function editNote() {
+		goto(`/edit?id=${id}`);
+	}
 </script>
 
 <FirebaseApp {auth} firestore={db}>
@@ -64,6 +68,9 @@
 							<button
 								on:click={deleteNote}
 								class="!border-none font-mono outline active:border-none">delete</button
+							>
+							<button on:click={editNote} class="!border-none font-mono outline active:border-none"
+								>edit</button
 							>
 							<br /><br />
 							<SvelteMarkdown source={note.content} />
