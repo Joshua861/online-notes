@@ -68,7 +68,10 @@
 			time: note.time,
 			user: username,
 			likes: 0,
-			likedBy: []
+			likedBy: [],
+			reports: 0,
+			reportedBy: [],
+			comments: []
 		});
 
 		goto(`/view?id=${docRef.id}`);
