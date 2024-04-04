@@ -71,7 +71,8 @@
 			likedBy: [],
 			reports: 0,
 			reportedBy: [],
-			comments: []
+			comments: [],
+			uid: user.uid
 		});
 
 		goto(`/view?id=${docRef.id}`);

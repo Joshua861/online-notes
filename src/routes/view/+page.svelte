@@ -37,6 +37,8 @@
 
 	async function likeNote() {
 		let user = get(userStore(auth));
+		console.log(user.uid);
+
 		let note = (await getDoc(doc(db, 'public', id))).data();
 
 		if (note.likedBy.includes(user.uid)) {
@@ -155,6 +157,10 @@
 
 		setDoc(doc(db, 'public', id), note);
 	}
+
+	async function deleteNote() {
+		deleteDoc(doc(db, 'public', id));
+	}
 </script>
 
 <svelte:head><title>View note</title></svelte:head>
@@ -168,12 +174,13 @@
 					<h1>{data.title}</h1>
 					<div class="gap-5 border font-mono text-slate-500">
 						<Time timestamp={data.time} /> | {data.likes} likes
-						<button on:click={likeNote} class="!border-none font-mono outline active:border-none"
-							>like</button
+						<a on:click={likeNote}>like</a> |
+						<a on:click={reportNote}>{data.reportedBy.includes(user.uid) ? 'unreport' : 'report'}</a
 						>
-						<button on:click={reportNote} class="!border-none font-mono outline active:border-none"
-							>{data.reportedBy.includes(user.uid) ? 'unreport' : 'report'}</button
-						>
+						{#if data.uid == user.uid}
+							|
+							<a on:click={deleteNote}>delete</a>
+						{/if}
 					</div>
 					<br /><br />
 					<SvelteMarkdown source={data.content} />
@@ -223,6 +230,14 @@
 							</li>
 						{/each}
 					</ul>
+					<div slot="loading" class="flex h-screen w-full justify-center align-middle">
+						<div class="my-auto">
+							<p class="my-auto text-center">Loading...</p>
+							<p class="text-center text-slate-500">
+								If this is taking longer than usual, this note might not exist.
+							</p>
+						</div>
+					</div>
 				</Doc>
 			{/if}
 		</SignedIn>

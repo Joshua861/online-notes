@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { initializeApp } from 'firebase/app';
 	import { getAuth } from 'firebase/auth';
-	import { collection, query, orderBy, limit, endAt, getDocs } from 'firebase/firestore';
+	import { collection, query, orderBy, limit, getDocs, startAfter } from 'firebase/firestore';
 	import { getFirestore } from 'firebase/firestore';
 	import { onMount } from 'svelte';
 	import { FirebaseApp, SignedIn, SignedOut } from 'sveltefire';
 	import Time from 'svelte-time/src/Time.svelte';
 	import Navbar from '$lib/Navbar.svelte';
+	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 
 	const firebaseConfig = {
 		apiKey: 'AIzaSyAS0OpX3__te9ONUbJH1hy5ovMIYeF84xo',
@@ -20,6 +22,8 @@
 	let app = initializeApp(firebaseConfig);
 	let auth = getAuth(app);
 	let db = getFirestore(app);
+	let p = $page.url.searchParams.get('p');
+	let lastDoc;
 
 	const publicRef = collection(db, 'public');
 
@@ -27,22 +31,62 @@
 	let notes = [];
 
 	async function fetchNotes() {
-		notes = [];
 		let docs;
 
-		if (order == 'popular')
-			docs = await getDocs(query(publicRef, orderBy('likes', 'desc'), limit(10)));
-		if (order == 'new') docs = await getDocs(query(publicRef, orderBy('time', 'desc'), limit(10)));
+		if (p == null) {
+			console.log('p is null');
+			// Fetch the first page without startAfter
+			docs = await getDocs(
+				query(publicRef, orderBy(order === 'new' ? 'time' : 'likes', 'desc'), limit(5))
+			);
+		} else {
+			// Fetch the next page using the last document from the previous page
+			docs = await getDocs(
+				query(
+					publicRef,
+					orderBy(order === 'new' ? 'time' : 'likes', 'desc'),
+					startAfter(lastDoc), // Use the last document from the previous page
+					limit(5)
+				)
+			);
+		}
 
-		let newNotes = notes;
-		docs.forEach((doc) => {
-			newNotes.push({ ...doc.data(), id: doc.id });
-		});
-		notes = newNotes;
+		if (docs.docs.length > 0) {
+			lastDoc = docs.docs[docs.docs.length - 1];
+		}
+
+		notes = docs.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
 		console.log(notes);
 	}
 
-	onMount(() => {
+	async function fetchMoreNotes() {
+		const publicRef = collection(db, 'public');
+		let docs;
+
+		if (lastDoc) {
+			docs = await getDocs(
+				query(
+					publicRef,
+					orderBy(order === 'new' ? 'time' : 'likes', 'desc'),
+					startAfter(lastDoc),
+					limit(5)
+				)
+			);
+		} else {
+			docs = await getDocs(
+				query(publicRef, orderBy(order === 'new' ? 'time' : 'likes', 'desc'), limit(5))
+			);
+		}
+
+		if (docs.docs.length > 0) {
+			lastDoc = docs.docs[docs.docs.length - 1];
+			notes = docs.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+		}
+
+		console.log(notes);
+	}
+
+	onMount(async () => {
 		fetchNotes();
 	});
 </script>
@@ -79,4 +123,6 @@
 			<br />
 		</li>
 	{/each}
+
+	<a on:click={fetchMoreNotes}>Show more</a>
 </div>

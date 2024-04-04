@@ -7,6 +7,7 @@
 	import Navbar from '$lib/Navbar.svelte';
 	import { goto } from '$app/navigation';
 	import Warning from '$lib/Warning.svelte';
+	import { get } from 'svelte/store';
 
 	const firebaseConfig = {
 		apiKey: 'AIzaSyAS0OpX3__te9ONUbJH1hy5ovMIYeF84xo',
@@ -20,24 +21,26 @@
 	const app = initializeApp(firebaseConfig);
 	const auth = getAuth(app);
 	const db = getFirestore(app);
-	const user = userStore(auth);
-
 	let title: string, content: string;
 
 	async function save() {
-		if ($user) {
-			let userDoc = await getDoc(doc(db, 'users', $user.uid));
+		let user = get(userStore(auth));
+
+		if (user) {
+			let userDoc = await getDoc(doc(db, 'users', user.uid));
 			console.log(userDoc);
 			if (userDoc.exists()) {
 				let userData = userDoc.data();
 				userData.notes.push({
-					title: title,
-					content: content,
+					title: title != undefined ? title : 'No title',
+					content: content != undefined ? content : 'No content',
 					id: uuidv4(),
 					time: Date.now()
 				});
 
-				setDoc(doc(db, 'users', $user.uid), userData);
+				console.log([db, user.uid, userData]); // nothing is logged out as undefined
+
+				setDoc(doc(db, 'users', user.uid), userData);
 
 				goto('/');
 			}
