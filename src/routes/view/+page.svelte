@@ -188,16 +188,10 @@
 								<div class="pb-2 text-slate-500">
 									{comment.user} | <Time timestamp={comment.time} relative /> | {comment.likes} likes
 								</div>
-								{comment.content}
-								<br />
-								<a class="mt-2 inline-block text-slate-500" on:click={() => likeComment(comment.id)}
-									>like</a
-								>
+								<SvelteMarkdown source={comment.content} />
+								<a class="text-slate-500" on:click={() => likeComment(comment.id)}>like</a>
 								|
-								<a
-									class="mt-2 inline-block text-slate-500"
-									on:click={() => (replyingTo = comment.id)}>reply</a
-								>
+								<a class="text-slate-500" on:click={() => (replyingTo = comment.id)}>reply</a>
 								{#if comment.uid == user.uid}
 									|
 									<a
@@ -216,9 +210,8 @@
 											<div class="pb-2 text-slate-500">
 												{reply.user} | <Time timestamp={reply.time} relative />
 											</div>
-											{reply.content}
+											<SvelteMarkdown source={reply.content} />
 											{#if reply.uid == user.uid}
-												<br />
 												<a
 													class="mt-2 inline-block text-slate-500"
 													on:click={() => deleteReply(comment.id, reply.id)}>delete</a
