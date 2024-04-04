@@ -210,25 +210,23 @@
 									<textarea name="reply box" id="reply-box" bind:value={reply}></textarea>
 									<button on:click={() => replyToComment(comment.id)}>reply</button>
 								{/if}
-								<div class="ml-10">
-									<ul class="list-none">
-										{#each comment.replies as reply}
-											<li class="mb-5 list-none">
-												<div class="pb-2 text-slate-500">
-													{reply.user} | <Time timestamp={reply.time} relative />
-												</div>
-												{reply.content}
-												{#if reply.uid == user.uid}
-													<br />
-													<a
-														class="mt-2 inline-block text-slate-500"
-														on:click={() => deleteReply(comment.id, reply.id)}>delete</a
-													>
-												{/if}
-											</li>
-										{/each}
-									</ul>
-								</div>
+								<ul class="list-none">
+									{#each comment.replies as reply}
+										<li class="mb-5 list-none">
+											<div class="pb-2 text-slate-500">
+												{reply.user} | <Time timestamp={reply.time} relative />
+											</div>
+											{reply.content}
+											{#if reply.uid == user.uid}
+												<br />
+												<a
+													class="mt-2 inline-block text-slate-500"
+													on:click={() => deleteReply(comment.id, reply.id)}>delete</a
+												>
+											{/if}
+										</li>
+									{/each}
+								</ul>
 							</li>
 						{/each}
 					</ul>
