@@ -4,13 +4,12 @@
 	import { onMount } from 'svelte';
 	import { Doc, SignedIn, userStore, FirebaseApp } from 'sveltefire';
 	import { getAuth } from 'firebase/auth';
-	import { getFirestore, setDoc, doc, getDoc, addDoc, collection } from 'firebase/firestore';
+	import { getFirestore } from 'firebase/firestore';
 	import { initializeApp } from 'firebase/app';
 	import SvelteMarkdown from 'svelte-markdown';
 	import Navbar from '$lib/Navbar.svelte';
 	import Time from 'svelte-time/src/Time.svelte';
-	import { get } from 'svelte/store';
-	import { v4 } from 'uuid';
+	import { deleteLocalNote, publishNote } from '$lib/utils';
 
 	const firebaseConfig = {
 		apiKey: 'AIzaSyAS0OpX3__te9ONUbJH1hy5ovMIYeF84xo',
@@ -25,57 +24,19 @@
 	let auth = getAuth(app);
 	let db = getFirestore(app);
 
-	let id: String;
+	let id: string | null;
 	let showPublishModal = false;
 
 	onMount(async () => {
 		if ($page.url.searchParams.get('id')) {
-			id = $page.url.searchParams.get('id');
+			id = $page.url.searchParams.get('id')!;
 		} else {
 			goto('/');
 		}
 	});
 
-	async function deleteNote() {
-		const user = userStore(auth);
-		const uid = get(user).uid;
-
-		const userData = await getDoc(doc(db, 'users', uid));
-		let notes = userData.data().notes;
-
-		notes = notes.filter((entry) => entry.id !== id);
-		let newUserData = userData.data();
-		newUserData.notes = notes;
-
-		setDoc(doc(db, 'users', uid), newUserData);
-
-		goto('/');
-	}
-
 	function editNote() {
 		goto(`/edit?id=${id}`);
-	}
-
-	async function publish() {
-		const user = get(userStore(auth));
-		let userData = (await getDoc(doc(db, 'users', user.uid))).data();
-		let note = userData.notes.find((note) => note.id == id);
-		let username = userData.username;
-
-		const docRef = await addDoc(collection(db, 'public'), {
-			title: note.title,
-			content: note.content,
-			time: note.time,
-			user: username,
-			likes: 0,
-			likedBy: [],
-			reports: 0,
-			reportedBy: [],
-			comments: [],
-			uid: user.uid
-		});
-
-		goto(`/view?id=${docRef.id}`);
 	}
 </script>
 
@@ -92,18 +53,11 @@
 							<h1>{note.title}</h1>
 							<div class="font-mono text-slate-500">
 								<Time timestamp={note.time} /> |
-								<a on:click={deleteNote} class="!border-none font-mono outline active:border-none"
-									>delete</a
-								>
+								<a on:click={() => deleteLocalNote(id)}>delete</a>
 								|
-								<a on:click={editNote} class="!border-none font-mono outline active:border-none"
-									>edit</a
-								>
+								<a on:click={editNote}>edit</a>
 								|
-								<a
-									on:click={() => (showPublishModal = true)}
-									class="!border-none font-mono outline active:border-none">publish</a
-								>
+								<a on:click={() => (showPublishModal = true)}>publish</a>
 							</div>
 							<br /><br />
 							<SvelteMarkdown source={note.content} />
@@ -136,7 +90,7 @@
 			</p>
 			<footer>
 				<button class="secondary" on:click={() => (showPublishModal = false)}> Cancel </button>
-				<button on:click={publish}>Publish</button>
+				<button on:click={() => publishNote(id)}>Publish</button>
 			</footer>
 		</article>
 	</dialog>

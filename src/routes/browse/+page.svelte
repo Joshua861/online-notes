@@ -9,6 +9,7 @@
 	import Navbar from '$lib/Navbar.svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { type publicNoteType } from '$lib/types';
 
 	const firebaseConfig = {
 		apiKey: 'AIzaSyAS0OpX3__te9ONUbJH1hy5ovMIYeF84xo',
@@ -34,7 +35,6 @@
 		let docs;
 
 		if (p == null) {
-			console.log('p is null');
 			// Fetch the first page without startAfter
 			docs = await getDocs(
 				query(publicRef, orderBy(order === 'new' ? 'time' : 'likes', 'desc'), limit(5))
@@ -56,7 +56,6 @@
 		}
 
 		notes = docs.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-		console.log(notes);
 	}
 
 	async function fetchMoreNotes() {
@@ -80,10 +79,12 @@
 
 		if (docs.docs.length > 0) {
 			lastDoc = docs.docs[docs.docs.length - 1];
-			notes = docs.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-		}
+			docs.docs.forEach((doc) => {
+				notes.push({ ...doc.data(), id: doc.id });
+			});
 
-		console.log(notes);
+			notes = notes;
+		}
 	}
 
 	onMount(async () => {
