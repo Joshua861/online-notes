@@ -42,9 +42,21 @@
 				await setDoc(doc(db, 'users', user.uid), {
 					notes: [
 						{
-							content: 'Welcome to my notes app.',
+							content: ```This notes app uses *Markdown* for text formatting, meaning you can add *italic*, **bold**, \`monospaced\`, and [hyperlinked](https://example.com) text.                
+You can also add:
+> Blockquotes!
+- Unordered
+- lists,
+1. Ordered
+2. lists,
+## Subheadings,
+and more.
+If you don't know Markdown, and want to learn, you can learn [here](https://commonmark.org/help/), or try editing this page to see how it was written.
+___
+## Storage
+All the notes inputted here are stored in the cloud, they are not encripted (yet), and are definately not somewhere you should put anything you wouldn't want people to know. I don't *think* it's possible for anyone to randomly get access to your notes but I'm very new to the whole database thing and I don't really know what I'm doing. Stay safe. Though the fact that they are on the cloud does mean that they are synced between devices.```,
 							date: Date.now(),
-							title: 'Hello world',
+							title: 'How to use',
 							id: uuidv4()
 						}
 					],
@@ -79,7 +91,7 @@
 <FirebaseApp {auth} firestore={db}>
 	<SignedOut>
 		<div class="flex h-screen w-screen justify-center align-middle">
-			<form class="m-3 mx-auto my-auto max-w-[800px]" on:submit|preventDefault>
+			<form class="mx-auto my-auto max-w-[800px] px-5" on:submit|preventDefault>
 				<label>
 					Username (non unique, leave blank if signing in)
 					<input type="text" name="username" id="username" bind:value={username} />

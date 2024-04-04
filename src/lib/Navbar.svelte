@@ -8,10 +8,13 @@
 	</ul>
 	<ul>
 		<li>
-			<a href="/create">Create note</a>
+			<a href="/create">Create</a>
 		</li>
 		<li>
-			<a href="/browse">Browse notes</a>
+			<a href="/browse">Browse</a>
+		</li>
+		<li>
+			<a href="/logout">Logout</a>
 		</li>
 	</ul>
 </nav>
