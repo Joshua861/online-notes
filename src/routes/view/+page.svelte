@@ -92,6 +92,8 @@
 		note.comments.sort((a, b) => b.time - a.time);
 
 		setDoc(doc(db, 'public', id), note);
+
+		comment = '';
 	}
 
 	async function deleteComment(commentID) {
@@ -143,6 +145,7 @@
 		setDoc(doc(db, 'public', id), note);
 
 		replyingTo = '';
+		reply = '';
 	}
 
 	async function deleteReply(commentID, replyID) {
