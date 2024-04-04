@@ -212,22 +212,26 @@
 									<textarea name="reply box" id="reply-box" bind:value={reply}></textarea>
 									<button on:click={() => replyToComment(comment.id)}>reply</button>
 								{/if}
-								<ul class="list-none">
-									{#each comment.replies as reply}
-										<li class="mb-5 list-none">
-											<div class="pb-2 text-slate-500">
-												{reply.user} | <Time timestamp={reply.time} relative />
-											</div>
-											<SvelteMarkdown source={reply.content} />
-											{#if reply.uid == user.uid}
-												<a
-													class="mt-2 inline-block text-slate-500"
-													on:click={() => deleteReply(comment.id, reply.id)}>delete</a
-												>
-											{/if}
-										</li>
-									{/each}
-								</ul>
+								<div
+									class="border-x-0 border-y-0 border-l border-l-4 border-solid border-slate-500/20"
+								>
+									<ul class="list-none">
+										{#each comment.replies as reply}
+											<li class="mb-5 list-none">
+												<div class="pb-2 text-slate-500">
+													{reply.user} | <Time timestamp={reply.time} relative />
+												</div>
+												<SvelteMarkdown source={reply.content} />
+												{#if reply.uid == user.uid}
+													<a
+														class="mt-2 inline-block text-slate-500"
+														on:click={() => deleteReply(comment.id, reply.id)}>delete</a
+													>
+												{/if}
+											</li>
+										{/each}
+									</ul>
+								</div>
 							</li>
 						{/each}
 					</ul>

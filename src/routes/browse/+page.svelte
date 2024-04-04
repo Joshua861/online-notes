@@ -97,18 +97,18 @@
 	<h1>Browse Notes</h1>
 
 	{#if order == 'popular'}
-		<button
+		<a
 			on:click={() => {
 				order = 'new';
 				fetchNotes();
-			}}>Sort by newest</button
+			}}>Sort by newest</a
 		>
 	{:else}
-		<button
+		<a
 			on:click={() => {
 				order = 'popular';
 				fetchNotes();
-			}}>Sort by most popular</button
+			}}>Sort by most popular</a
 		>
 	{/if}
 

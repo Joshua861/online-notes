@@ -90,22 +90,33 @@
 					{#each data?.notes as note}
 						{#if note.id === id}
 							<h1>{note.title}</h1>
-							<Time class=" font-mono text-slate-500" timestamp={note.time} />
-							<button
-								on:click={deleteNote}
-								class="!border-none font-mono outline active:border-none">delete</button
-							>
-							<button on:click={editNote} class="!border-none font-mono outline active:border-none"
-								>edit</button
-							>
-							<button
-								on:click={() => (showPublishModal = true)}
-								class="!border-none font-mono outline active:border-none">publish</button
-							>
+							<div class="font-mono text-slate-500">
+								<Time timestamp={note.time} /> |
+								<a on:click={deleteNote} class="!border-none font-mono outline active:border-none"
+									>delete</a
+								>
+								|
+								<a on:click={editNote} class="!border-none font-mono outline active:border-none"
+									>edit</a
+								>
+								|
+								<a
+									on:click={() => (showPublishModal = true)}
+									class="!border-none font-mono outline active:border-none">publish</a
+								>
+							</div>
 							<br /><br />
 							<SvelteMarkdown source={note.content} />
 						{/if}
 					{/each}
+					<div slot="loading" class="flex h-screen w-full justify-center align-middle">
+						<div class="my-auto">
+							<p class="my-auto text-center">Loading...</p>
+							<p class="text-center text-slate-500">
+								If this is taking longer than usual, this note might not exist.
+							</p>
+						</div>
+					</div>
 				</Doc>
 			{/if}
 		</SignedIn>
