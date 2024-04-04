@@ -138,6 +138,8 @@
 			uid: user?.uid
 		});
 
+		comment.replies.sort((a, b) => a.time - b.time);
+
 		setDoc(doc(db, 'public', id), note);
 
 		replyingTo = '';
@@ -206,19 +208,23 @@
 									<button on:click={() => replyToComment(comment.id)}>reply</button>
 								{/if}
 								<div class="ml-10">
-									{#each comment.replies as reply}
-										<div class="pb-2 text-slate-500">
-											{reply.user} | <Time timestamp={reply.time} relative />
-										</div>
-										{reply.content}
-										{#if reply.uid == user.uid}
-											<br />
-											<a
-												class="mt-2 inline-block text-slate-500"
-												on:click={() => deleteReply(comment.id, reply.id)}>delete</a
-											>
-										{/if}
-									{/each}
+									<ul class="list-none">
+										{#each comment.replies as reply}
+											<li class="mb-5 list-none">
+												<div class="pb-2 text-slate-500">
+													{reply.user} | <Time timestamp={reply.time} relative />
+												</div>
+												{reply.content}
+												{#if reply.uid == user.uid}
+													<br />
+													<a
+														class="mt-2 inline-block text-slate-500"
+														on:click={() => deleteReply(comment.id, reply.id)}>delete</a
+													>
+												{/if}
+											</li>
+										{/each}
+									</ul>
 								</div>
 							</li>
 						{/each}
