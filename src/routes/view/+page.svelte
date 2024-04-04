@@ -91,7 +91,7 @@
 			uid: user.uid
 		});
 
-		note.comments.sort((a, b) => b.time - a.time);
+		note.comments.sort((a, b) => b.likes - a.likes);
 
 		setDoc(doc(db, 'public', id), note);
 
@@ -120,6 +120,7 @@
 			comment.likedBy.push(user.uid);
 		}
 		comment.likes = comment.likedBy.length;
+		note.comments.sort((a, b) => b.likes - a.likes);
 
 		setDoc(doc(db, 'public', id), note);
 	}
