@@ -111,7 +111,7 @@
 						<img
 							class="m-5 mx-auto max-h-[600px] w-auto rounded-2xl"
 							src="/no-notes.jpg"
-							alt="That meme of a guy saying here's where I'd put my trophy... IF I HAD ANY, and he's got a really sad face, except I replaced trophy with notes. So it's like: you don't have any notes, maybe you should make one."
+							alt="That meme of a guy saying here's where I'd put my trophy... IF I HAD ONE, and he's got a really sad face, except I replaced trophy with notes. So it's like: you don't have any notes, maybe you should make one."
 						/>
 						<br />
 						<a class="text-center" href="/create">Create note</a>

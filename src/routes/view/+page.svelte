@@ -173,7 +173,7 @@
 				<Doc ref="/public/{id}" let:data>
 					<h1>{data.title}</h1>
 					<div class="gap-5 border font-mono text-slate-500">
-						<Time timestamp={data.time} /> | {data.likes} likes
+						<Time timestamp={data.time} /> | {data.likes} likes |
 						<a on:click={likeNote}>like</a> |
 						<a on:click={reportNote}>{data.reportedBy.includes(user.uid) ? 'unreport' : 'report'}</a
 						>
