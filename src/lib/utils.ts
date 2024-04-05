@@ -1,4 +1,13 @@
-import { addDoc, collection, deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
+import {
+	DocumentSnapshot,
+	addDoc,
+	collection,
+	deleteDoc,
+	getDoc,
+	setDoc,
+	type DocumentData,
+	doc
+} from 'firebase/firestore';
 import { userStore } from 'sveltefire';
 import { get } from 'svelte/store';
 import { authStore, dbStore } from './stores';
@@ -116,6 +125,8 @@ export async function deletePublicNote(noteID: string | null) {
 	}
 
 	deleteDoc(doc(get(dbStore), 'public', noteID!));
+
+	goto('/browse');
 }
 
 export async function likeNote(noteID: string | null) {
@@ -308,6 +319,39 @@ export async function deleteLocalNote(noteID: string | null) {
 	goto('/');
 }
 
+export async function deleteSharedNote(noteID: string | null) {
+	if (!get(user)) {
+		toast.error('User not found.', {
+			description:
+				'Sometimes this happens if you try to perform an action just after the page loads, just give it a sec and retry.'
+		});
+		return;
+	}
+
+	if (!noteID) {
+		toast.error('No note ID (this should be impossible).');
+	}
+
+	const note = await getDoc(doc(get(dbStore), 'shared', noteID!));
+
+	note.data().sharedUsers.forEach(async (user) => {
+		const docRef = doc(get(dbStore), 'sharedRefs', user);
+		const ref = (await getDoc(docRef)).data();
+
+		if (!ref) {
+			return;
+		}
+
+		ref.notes = ref.notes.filter((note) => note != noteID);
+
+		setDoc(docRef, ref);
+	});
+
+	deleteDoc(doc(get(dbStore), 'shared', noteID!));
+
+	goto('/');
+}
+
 export async function publishNote(noteID: string | null) {
 	const userSnap = get(user);
 	if (!userSnap) {
@@ -346,4 +390,71 @@ export async function publishNote(noteID: string | null) {
 	});
 
 	goto(`/view?id=${docRef.id}`);
+}
+
+async function getLocalNote(noteID: string): Promise<localNoteType | undefined> {
+	if (!noteID) {
+		toast.error('Note not found.');
+		return;
+	}
+
+	const docSnap: DocumentSnapshot = await getDoc(doc(get(dbStore), 'users', get(user)!.uid))!;
+	const data: DocumentData | undefined = docSnap.data();
+	const note = data!.notes.find((note: localNoteType) => note.id == noteID);
+
+	return note;
+}
+
+export async function shareNote(noteID: string | null, email: string) {
+	const userSnap = get(user);
+
+	if (!userSnap) {
+		toast.error('User not found.');
+		return;
+	}
+
+	if (!email) {
+		toast.error('No user identifier.');
+		return;
+	}
+
+	const note = await getLocalNote(noteID!);
+
+	if (!note) {
+		toast.error('Note not found.');
+		return;
+	}
+
+	setDoc(doc(get(dbStore), 'shared', noteID!), {
+		...note,
+		sharedUsers: [email, userSnap.email]
+	});
+
+	let userSharedRefs = (await getDoc(doc(get(dbStore), 'sharedRefs', userSnap.email!))).data();
+
+	if (!userSharedRefs) {
+		userSharedRefs = { notes: [] };
+	}
+
+	if (!userSharedRefs.notes) {
+		userSharedRefs.notes = [];
+	}
+
+	userSharedRefs.notes.push(noteID);
+	setDoc(doc(get(dbStore), 'sharedRefs', userSnap.email!), userSharedRefs);
+
+	let user2SharedRefs = (await getDoc(doc(get(dbStore), 'sharedRefs', email))).data();
+
+	if (!user2SharedRefs) {
+		user2SharedRefs = { notes: [] };
+	}
+
+	if (!user2SharedRefs.notes) {
+		user2SharedRefs.notes = [];
+	}
+
+	user2SharedRefs.notes.push(noteID);
+	setDoc(doc(get(dbStore), 'sharedRefs', email), user2SharedRefs);
+
+	toast.success('Shared!');
 }

@@ -2,14 +2,11 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-	import { Doc, SignedIn, userStore, FirebaseApp } from 'sveltefire';
-	import { getAuth } from 'firebase/auth';
-	import { getFirestore } from 'firebase/firestore';
-	import { initializeApp } from 'firebase/app';
+	import { Doc, SignedIn, FirebaseApp } from 'sveltefire';
 	import SvelteMarkdown from 'svelte-markdown';
 	import Navbar from '$lib/Navbar.svelte';
 	import Time from 'svelte-time/src/Time.svelte';
-	import { deleteLocalNote, publishNote, shareNote } from '$lib/utils';
+	import { deleteSharedNote, publishNote, shareNote } from '$lib/utils';
 	import { appStore, authStore, dbStore } from '$lib/stores';
 
 	let app, auth, db;
@@ -38,7 +35,7 @@
 	});
 
 	function editNote() {
-		goto(`/edit?id=${id}`);
+		goto(`/shared-edit?id=${id}`);
 	}
 </script>
 
@@ -49,23 +46,19 @@
 		<Navbar />
 		<SignedIn let:user>
 			{#if id}
-				<Doc ref="/users/{user.uid}" let:data>
-					{#each data?.notes as note}
-						{#if note.id === id}
-							<h1>{note.title}</h1>
-							<div class="font-mono text-slate-500">
-								<Time timestamp={note.time} /> |
-								<a on:click={() => deleteLocalNote(id)}>delete</a>
-								|
-								<a on:click={editNote}>edit</a>
-								|
-								<a on:click={() => (showPublishModal = true)}>publish</a> |
-								<a on:click={() => (showShareModal = true)}>share</a>
-							</div>
-							<br /><br />
-							<SvelteMarkdown source={note.content} />
-						{/if}
-					{/each}
+				<Doc ref="/shared/{id}" let:data>
+					<h1>{data.title}</h1>
+					<div class="font-mono text-slate-500">
+						<Time timestamp={data.time} /> |
+						<a on:click={() => deleteSharedNote(id)}>delete</a>
+						|
+						<a on:click={editNote}>edit</a>
+						|
+						<a on:click={() => (showPublishModal = true)}>publish</a> |
+						<a on:click={() => (showShareModal = true)}>share</a>
+					</div>
+					<br /><br />
+					<SvelteMarkdown source={data.content} />
 					<div slot="loading" class="flex h-screen w-full justify-center align-middle">
 						<div class="my-auto">
 							<p class="my-auto text-center">Loading...</p>

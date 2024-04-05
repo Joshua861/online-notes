@@ -1,16 +1,29 @@
 <script lang="ts">
-	import { SignedIn, SignedOut, FirebaseApp, Doc } from 'sveltefire';
+	import { SignedIn, SignedOut, FirebaseApp, Doc, userStore } from 'sveltefire';
 	import {
 		createUserWithEmailAndPassword,
 		signInWithEmailAndPassword,
 		getAuth
 	} from 'firebase/auth';
-	import { getFirestore, setDoc, doc } from 'firebase/firestore';
+	import {
+		getFirestore,
+		setDoc,
+		getDoc,
+		doc,
+		query,
+		getDocs,
+		collection,
+		orderBy,
+		where
+	} from 'firebase/firestore';
 	import { initializeApp } from 'firebase/app';
 	import { v4 as uuidv4 } from 'uuid';
 	import Navbar from '$lib/Navbar.svelte';
 	import { toast } from 'svelte-sonner';
 	import Time from 'svelte-time/src/Time.svelte';
+	import { onMount } from 'svelte';
+	import { authStore, dbStore } from '$lib/stores';
+	import { get } from 'svelte/store';
 
 	const firebaseConfig = {
 		apiKey: 'AIzaSyAS0OpX3__te9ONUbJH1hy5ovMIYeF84xo',
@@ -26,14 +39,14 @@
 	const db = getFirestore(app);
 
 	let email: string, password: string, username: string;
+	let sharedNotes;
 
 	function signUp() {
 		if (username.length < 3) {
 			toast.error('Username too short.');
 			return;
 		} else if (username.length > 20) {
-			toast.error('Username too long');
-			return;
+			toast.error('User			return;name too long');
 		}
 
 		createUserWithEmailAndPassword(auth, email, password)
@@ -73,6 +86,60 @@
 				});
 			});
 	}
+
+	onMount(async () => {
+		let user = userStore(get(authStore));
+
+		user.subscribe(async (user) => {
+			if (!user) {
+				return;
+			}
+
+			sharedNotes = await getSharedNotes(user);
+		});
+	});
+
+	$: console.log('SHARED NOTES', sharedNotes);
+
+	const getSharedNotes = async (user) => {
+		try {
+			const db = getFirestore();
+			const sharedRefsCollection = collection(db, 'sharedRefs');
+
+			const sharedRefDocs = await getDocs(
+				query(sharedRefsCollection, where('__name__', '==', user.email))
+			);
+
+			let sharedRefs = sharedRefDocs.docs.map((doc) => doc.ref);
+			console.log(sharedRefs);
+
+			// Use Promise.all to wait for all async operations to complete
+			let notes = await Promise.all(
+				sharedRefs.map(async (ref) => {
+					let refDoc = await getDoc(ref);
+					return Promise.all(
+						refDoc.data()!.notes.map(async (noteID: string) => {
+							let note = (await getDoc(doc(db, 'shared', noteID))).data();
+							console.log(note);
+							return note; // Return the note directly
+						})
+					);
+				})
+			);
+
+			console.log(notes);
+
+			// Flatten the array of arrays into a single array
+			notes = notes.flat();
+
+			// Update sharedNotes reactively
+			sharedNotes = notes;
+
+			return notes;
+		} catch (error) {
+			console.error('Error getting shared note references: ', error);
+		}
+	};
 </script>
 
 <svelte:head><title>Notes</title></svelte:head>
@@ -105,6 +172,22 @@
 		<div class="container">
 			<Navbar />
 			<h1>Notes</h1>
+
+			{#if sharedNotes != 'loading' && sharedNotes != undefined}
+				<ul>
+					{#each sharedNotes as note}
+						<li class="list-none text-lg">
+							<a href="/shared-note?id={note.id}">{note.title}</a>
+							<br />
+							<div class="font-mono text-slate-500">
+								<Time timestamp={note.time} />
+								<br />
+								Shared with you
+							</div>
+						</li>
+					{/each}
+				</ul>
+			{/if}
 
 			<Doc ref="users/{user.uid}" let:data={user}>
 				{#if user.notes.length === 0}

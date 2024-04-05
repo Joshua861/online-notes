@@ -3,8 +3,6 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { Doc, SignedIn, FirebaseApp } from 'sveltefire';
-	import { type Auth } from 'firebase/auth';
-	import { Firestore } from 'firebase/firestore';
 	import SvelteMarkdown from 'svelte-markdown';
 	import Navbar from '$lib/Navbar.svelte';
 	import Time from 'svelte-time/src/Time.svelte';
@@ -18,9 +16,7 @@
 		reportNote,
 		likeComment
 	} from '$lib/utils';
-	import { initApp } from '$lib/app';
-	import { toast } from 'svelte-sonner';
-	import { authStore, dbStore, appStore } from '$lib/stores';
+	import { authStore, dbStore } from '$lib/stores';
 
 	let id: string | null, comment: string, replyingTo: string, reply: string;
 
