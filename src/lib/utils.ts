@@ -407,6 +407,7 @@ async function getLocalNote(noteID: string): Promise<localNoteType | undefined> 
 
 export async function shareNote(noteID: string | null, email: string) {
 	const userSnap = get(user);
+	email = email.toLowerCase();
 
 	if (!userSnap) {
 		toast.error('User not found.');
@@ -464,6 +465,7 @@ export async function shareNote(noteID: string | null, email: string) {
 
 export async function shareSharedNote(noteID: string | null, email: string) {
 	const userSnap = get(user);
+	email = email.toLowerCase();
 
 	if (!userSnap) {
 		toast.error('User not found.');

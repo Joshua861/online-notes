@@ -140,7 +140,7 @@
 
 			<label>
 				User email
-				<input type="text" bind:value={uid} />
+				<input type="email" bind:value={uid} />
 			</label>
 
 			<footer>
