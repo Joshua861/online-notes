@@ -457,4 +457,56 @@ export async function shareNote(noteID: string | null, email: string) {
 	setDoc(doc(get(dbStore), 'sharedRefs', email), user2SharedRefs);
 
 	toast.success('Shared!');
+
+	cleanRefs(email);
+	cleanRefs(get(user)!.email!);
+}
+
+export async function shareSharedNote(noteID: string | null, email: string) {
+	const userSnap = get(user);
+
+	if (!userSnap) {
+		toast.error('User not found.');
+		return;
+	}
+
+	if (!email) {
+		toast.error('No user identifier.');
+		return;
+	}
+
+	const note = (await getDoc(doc(get(dbStore)!, 'shared', noteID!))).data();
+
+	if (!note) {
+		toast.error('Note not found.');
+		return;
+	}
+
+	note!.sharedUsers.push(email);
+	setDoc(doc(get(dbStore), 'shared', noteID!), note);
+
+	let user2SharedRefs = (await getDoc(doc(get(dbStore), 'sharedRefs', email))).data();
+
+	if (!user2SharedRefs) {
+		user2SharedRefs = { notes: [] };
+	}
+
+	if (!user2SharedRefs.notes) {
+		user2SharedRefs.notes = [];
+	}
+
+	user2SharedRefs.notes.push(noteID);
+	setDoc(doc(get(dbStore), 'sharedRefs', email), user2SharedRefs);
+
+	toast.success('Shared!');
+
+	cleanRefs(email);
+	cleanRefs(get(user)!.email!);
+}
+
+async function cleanRefs(email: string) {
+	const docRef = doc(get(dbStore), 'sharedRefs', email);
+	const ref = (await getDoc(docRef)).data();
+	ref!.notes = [...new Set(ref!.notes)];
+	setDoc(docRef, ref);
 }

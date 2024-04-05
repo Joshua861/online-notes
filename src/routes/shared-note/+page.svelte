@@ -6,7 +6,7 @@
 	import SvelteMarkdown from 'svelte-markdown';
 	import Navbar from '$lib/Navbar.svelte';
 	import Time from 'svelte-time/src/Time.svelte';
-	import { deleteSharedNote, publishNote, shareNote } from '$lib/utils';
+	import { deleteSharedNote, publishNote, shareNote, shareSharedNote } from '$lib/utils';
 	import { appStore, authStore, dbStore } from '$lib/stores';
 
 	let app, auth, db;
@@ -144,7 +144,7 @@
 			</label>
 
 			<footer>
-				<button on:click={() => shareNote(id, uid)}>Share</button>
+				<button on:click={() => shareSharedNote(id, uid)}>Share</button>
 				<button class="secondary" on:click={() => (showShareModal = false)}>Cancel</button>
 			</footer>
 		</article>
