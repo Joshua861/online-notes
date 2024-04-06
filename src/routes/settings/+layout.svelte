@@ -1,5 +1,6 @@
 <script>
 	import Navbar from '$lib/Navbar.svelte';
+	import { page } from '$app/stores';
 
 	let links = [
 		{
@@ -27,3 +28,7 @@
 
 	<slot />
 </div>
+
+<svelte:head>
+	<title>Settings</title>
+</svelte:head>
