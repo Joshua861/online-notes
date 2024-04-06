@@ -14,7 +14,7 @@
 			<a href="/browse">Browse</a>
 		</li>
 		<li>
-			<a href="/logout">Logout</a>
+			<a href="/settings/account">Settings</a>
 		</li>
 	</ul>
 </nav>
