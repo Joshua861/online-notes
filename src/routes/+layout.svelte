@@ -2,12 +2,23 @@
 	import '../app.pcss';
 	import { theme } from '$lib/themes';
 	import { Toaster } from 'svelte-sonner';
-	import '@picocss/pico';
+	import { applyFonts } from '$lib/fonts';
+	import { fontSettings } from '$lib/fonts';
 
 	let themeValue: string;
 
 	theme.subscribe((theme) => {
 		themeValue = theme;
+	});
+
+	import { onDestroy } from 'svelte';
+
+	let unsubscribe = fontSettings.subscribe(() => {
+		applyFonts();
+	});
+
+	onDestroy(() => {
+		unsubscribe();
 	});
 </script>
 
